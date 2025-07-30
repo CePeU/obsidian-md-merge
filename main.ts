@@ -16,7 +16,6 @@ interface MergePluginSettings {
   includeHidden: boolean;
   excludedFiles: string;
   recursive: boolean;
-  showRibbonIcon: boolean;
 }
 
 const DEFAULT_SETTINGS: MergePluginSettings = {
@@ -26,7 +25,6 @@ const DEFAULT_SETTINGS: MergePluginSettings = {
   includeHidden: false,
   excludedFiles: "",
   recursive: false,
-  showRibbonIcon: true
 };
 
 export default class MergeMarkdownPlugin extends Plugin {
@@ -34,12 +32,6 @@ export default class MergeMarkdownPlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
-
-    if (this.settings.showRibbonIcon) {
-      this.addRibbonIcon('merge', 'Merge .md files', async () => {
-        await this.mergeMarkdownFiles();
-      });
-    }
 
     this.addCommand({
       id: 'merge-md-files',
@@ -69,7 +61,7 @@ export default class MergeMarkdownPlugin extends Plugin {
       folder = this.app.vault.getRoot();
     } else {
       const found = this.app.vault.getFolderByPath(this.settings.folderName);
-      if (!found || !(found instanceof TFolder)) {
+      if (!found) {
         new Notice(`Folder "${this.settings.folderName}" not found or is not a folder.`);
         return;
       }
@@ -254,19 +246,6 @@ class MergeSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.excludedFiles = value;
             await this.plugin.saveSettings();
-          })
-      );
-
-    new Setting(containerEl)
-      .setName("Show ribbon button")
-      .setDesc("Toggle to show or hide the ribbon button. This setting will reload Obsidian if changed.")
-      .addToggle(toggle =>
-        toggle
-          .setValue(this.plugin.settings.showRibbonIcon)
-          .onChange(async (value) => {
-            this.plugin.settings.showRibbonIcon = value;
-            await this.plugin.saveSettings();
-            window.location.reload();
           })
       );
   }
