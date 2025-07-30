@@ -15,10 +15,9 @@ const manifest = {
   id: "md-merge",
   name: ".md Merge",
   version: pkg.version,
-  minAppVersion: "0.12.0",
+  minAppVersion: "1.8.10",
   description: "Merge all markdown files from a folder into a single file.",
   author: pkg.author || "Tosatur",
-  main: "main.js"
 };
 
 const versions = {
