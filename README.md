@@ -10,10 +10,9 @@
 * Exclude specific files or patterns using glob syntax (e.g., `README.md`, `drafts/*.md`)
 * Optionally include or exclude hidden files
 * Create output folders automatically if they don't exist
-* Toggle the ribbon icon on or off
 * Access functionality via:
 
-  * Sidebar ribbon button (optional)
+  * Sidebar ribbon button
   * Command palette
   * Hotkey
 
@@ -41,7 +40,6 @@
 * **Include hidden files**: Include files that begin with a `.`
 * **Recursive mode**: Include files from subfolders.
 * **Excluded files**: Glob patterns to ignore (comma-separated).
-* **Show sidebar button**: Show/hide the ribbon icon.
 
 ## Commands
 
