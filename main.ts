@@ -122,11 +122,8 @@ export default class MergeMarkdownPlugin extends Plugin {
       } else {
         header = `# ${file.basename}\n\n`;
       }
-       console.log("Tag list: ",this.settings.MDMlist)
-      console.log("Tag list länge: ",this.settings.MDMlist.length)
       if(this.settings.MDMlist.length>0){
       
-      console.log("Tag list: ",frontmatter?.MDMlist)
       const array1: string[] = this.settings?.MDMlist ?? [];
       const array2: string[] = frontmatter?.MDMlist ?? [];
       const set2 = new Set(array2);
@@ -327,9 +324,7 @@ class MergeSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.MDMlist.join(','))
           .onChange(async (value) => {
             let tagList = value.split(',').map(item => item.trim());
-            console.log("L1",tagList)
             if (tagList[0]==="") { tagList = []}
-            console.log("L2",tagList)
             this.plugin.settings.MDMlist = tagList;
             await this.plugin.saveSettings();
           })
