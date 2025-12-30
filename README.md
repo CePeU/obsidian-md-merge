@@ -40,6 +40,9 @@
 * **Include hidden files**: Include files that begin with a `.`
 * **Recursive mode**: Include files from subfolders.
 * **Excluded files**: Glob patterns to ignore (comma-separated).
+* **Use frontmatter property "MDMtitle" as seperator**: Expects a property MDMtitle of type string. The string found in the property will be used as seperator instead of the filename.
+* **Remove frontmatter before merge**: Removes frontmatter information before note is merged
+* **Use list to keep**: Will expect a frontmatter property "MDMlist" of type list item. If one of the items in this setting is found in the list of the property then the note will be exported and merged.
 
 ## Commands
 

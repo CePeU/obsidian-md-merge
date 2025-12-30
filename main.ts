@@ -16,6 +16,9 @@ interface MergePluginSettings {
   includeHidden: boolean;
   excludedFiles: string;
   recursive: boolean;
+  isDifferentTitle: boolean;
+  isOnlyBody: boolean;
+  MDMlist: string[];
 }
 
 const DEFAULT_SETTINGS: MergePluginSettings = {
@@ -25,6 +28,9 @@ const DEFAULT_SETTINGS: MergePluginSettings = {
   includeHidden: false,
   excludedFiles: "",
   recursive: false,
+  isDifferentTitle: false,
+  isOnlyBody: false,
+  MDMlist: [],
 };
 
 export default class MergeMarkdownPlugin extends Plugin {
@@ -104,9 +110,47 @@ export default class MergeMarkdownPlugin extends Plugin {
     let mergedContent = "";
 
     for (const file of files) {
-      const content = await this.app.vault.read(file);
-      const header = file.basename;
-      mergedContent += `# ${header}\n\n${content.trim()}\n\n`;
+      let header =""
+      let content = ""
+      let finalContent=""
+      const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter || {};
+      if (this.settings.isDifferentTitle){
+        header = frontmatter?.MDMtitle ?? "";
+        if (header){
+          header = `${header}\n\n`;
+        }
+      } else {
+        header = `# ${file.basename}\n\n`;
+      }
+       console.log("Tag list: ",this.settings.MDMlist)
+      console.log("Tag list länge: ",this.settings.MDMlist.length)
+      if(this.settings.MDMlist.length>0){
+      
+      console.log("Tag list: ",frontmatter?.MDMlist)
+      const array1: string[] = this.settings?.MDMlist ?? [];
+      const array2: string[] = frontmatter?.MDMlist ?? [];
+      const set2 = new Set(array2);
+      const hasMatch: boolean = array1.some(item => set2.has(item));
+      if(hasMatch){
+        content = await this.app.vault.read(file);
+        if(this.settings.isOnlyBody){
+       const endIndex = content.indexOf('\n---\n', content.indexOf('---\n') + 3);
+       content = endIndex > -1 ? content.slice(endIndex + 5) : content;
+      }
+        
+        finalContent = `${header}${content.trim()}\n\n`;
+      }
+      } else {
+       content = await this.app.vault.read(file);
+       if(this.settings.isOnlyBody){
+       const endIndex = content.indexOf('\n---\n', content.indexOf('---\n') + 3);
+       content = endIndex > -1 ? content.slice(endIndex + 5) : content;
+      }
+        
+        finalContent = `${header}${content.trim()}\n\n`;
+      }
+
+      mergedContent += finalContent;
     }
 
     try {
@@ -248,5 +292,50 @@ class MergeSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
-  }
+    
+    new Setting(containerEl)
+      .setName('Use frontmatter property "MDMtitle" as seperator.')
+      .setDesc('Will only use the frontmatter property string of "MDMtitle" as the seperator.')
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.isDifferentTitle)
+          .onChange(async (value) => {
+            this.plugin.settings.isDifferentTitle = value;
+            await this.plugin.saveSettings();
+          })
+      );
+    
+      new Setting(containerEl)
+      .setName("Remove frontmatter before merge")
+      .setDesc("Will remove the front matter block before merging the content")
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.isOnlyBody)
+          .onChange(async (value) => {
+            this.plugin.settings.isOnlyBody = value;
+            await this.plugin.saveSettings();
+          })
+      ); 
+
+
+      new Setting(containerEl)
+      .setName("Use list to keep")
+      .setDesc('Comma-separated list. Will keep only files for merge which hold the listed list items in property "MDMlist".')
+      .addTextArea(text =>
+        text
+          .setPlaceholder("npc, secret, date")
+          .setValue(this.plugin.settings.MDMlist.join(','))
+          .onChange(async (value) => {
+            let tagList = value.split(',').map(item => item.trim());
+            console.log("L1",tagList)
+            if (tagList[0]==="") { tagList = []}
+            console.log("L2",tagList)
+            this.plugin.settings.MDMlist = tagList;
+            await this.plugin.saveSettings();
+          })
+      );
+      
+
+  
+    }
 }
