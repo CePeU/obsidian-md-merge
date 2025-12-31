@@ -16,9 +16,10 @@ interface MergePluginSettings {
   includeHidden: boolean;
   excludedFiles: string;
   recursive: boolean;
-  isDifferentTitle: boolean;
+  MDMtitle: string;
   isOnlyBody: boolean;
   MDMlist: string[];
+  showRibbonIcon: boolean;
 }
 
 const DEFAULT_SETTINGS: MergePluginSettings = {
@@ -28,9 +29,11 @@ const DEFAULT_SETTINGS: MergePluginSettings = {
   includeHidden: false,
   excludedFiles: "",
   recursive: false,
-  isDifferentTitle: false,
+  MDMtitle: 'MDMtitle',
   isOnlyBody: false,
   MDMlist: [],
+  showRibbonIcon: true,
+  
 };
 
 export default class MergeMarkdownPlugin extends Plugin {
@@ -38,6 +41,12 @@ export default class MergeMarkdownPlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
+
+    if (this.settings.showRibbonIcon) {
+      this.addRibbonIcon('merge', 'Merge .md files', async () => {
+        await this.mergeMarkdownFiles();
+      });
+    }
 
     this.addCommand({
       id: 'merge-md-files',
@@ -114,8 +123,11 @@ export default class MergeMarkdownPlugin extends Plugin {
       let content = ""
       let finalContent=""
       const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter || {};
-      if (this.settings.isDifferentTitle){
-        header = frontmatter?.MDMtitle ?? "";
+      if (this.settings.MDMtitle){
+        if (this.settings.MDMtitle in frontmatter && 
+        typeof frontmatter[this.settings.MDMtitle] === 'string') {
+      header = frontmatter[this.settings.MDMtitle] ?? "";
+    }
         if (header){
           header = `${header}\n\n`;
         }
@@ -289,19 +301,20 @@ class MergeSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
-    
-    new Setting(containerEl)
-      .setName('Use frontmatter property "MDMtitle" as seperator.')
-      .setDesc('Will only use the frontmatter property string of "MDMtitle" as the seperator.')
-      .addToggle(toggle =>
-        toggle
-          .setValue(this.plugin.settings.isDifferentTitle)
-          .onChange(async (value) => {
-            this.plugin.settings.isDifferentTitle = value;
-            await this.plugin.saveSettings();
-          })
-      );
-    
+
+  new Setting(containerEl)
+  .setName('Custom Title Property seperator')
+  .setDesc('Frontmatter property name for custom title seperator (e.g., MDMtitle). Make sure the property is of type string!')
+  .addText(text => text
+    .setPlaceholder('MDMtitle')
+    .setValue(this.plugin.settings.MDMtitle)
+    .onChange(async (value) => {
+      this.plugin.settings.MDMtitle = value;
+      await this.plugin.saveSettings();
+    })
+  );
+
+
       new Setting(containerEl)
       .setName("Remove frontmatter before merge")
       .setDesc("Will remove the front matter block before merging the content")
@@ -331,6 +344,18 @@ class MergeSettingTab extends PluginSettingTab {
       );
       
 
+    new Setting(containerEl)
+      .setName("Show ribbon button")
+      .setDesc("Toggle to show or hide the ribbon button. This setting will reload Obsidian if changed.")
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.showRibbonIcon)
+          .onChange(async (value) => {
+            this.plugin.settings.showRibbonIcon = value;
+            await this.plugin.saveSettings();
+            window.location.reload();
+          })
+      );
   
     }
 }

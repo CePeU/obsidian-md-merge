@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node build.mjs production"
+    "build": "node build.mjs production",
+    "postbuild": "copy .\\release\\*.j* \"G:\\CodingCastrop\\Obsidian Vault\\DSA Kampagne Obsidian\\.obsidian\\plugins\\md-merge\""
   },
   "keywords": [],
   "author": "",
@@ -17,5 +18,8 @@
     "minimatch": "^10.0.1",
     "obsidian": "^1.8.7",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "tsc": "^2.0.4"
   }
 }
