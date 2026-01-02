@@ -1,7 +1,7 @@
 name: Release Obsidian plugin
-permissions:
-  contents: write  # Add this
+
 on:
+  workflow_dispatch:
   push:
     tags:
       - "*"
