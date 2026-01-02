@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node build.mjs production",
-    "postbuild": "copy .\\release\\*.j* \"G:\\CodingCastrop\\Obsidian Vault\\DSA Kampagne Obsidian\\.obsidian\\plugins\\md-merge\""
   },
   "keywords": [],
   "author": "",
